@@ -1,8 +1,14 @@
 package com.rianzessh.app.controllers;
 
+import com.rianzessh.app.dto.ResponseData;
 import com.rianzessh.app.models.entities.Product;
 import com.rianzessh.app.services.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,9 +27,23 @@ public class ProductController {
         String result = restTemplate.getForObject(uri,String.class);
         return result;
     }
+
     @PostMapping
-    public Product createOne(@RequestBody Product product) {
-        return productService.insert(product);
+    public ResponseEntity<ResponseData<Product>> createOne(@Valid @RequestBody Product product, Errors errors) {
+        ResponseData<Product> responseData = new ResponseData<>();
+
+        if (errors.hasErrors()){
+            for (ObjectError errs : errors.getAllErrors()) {
+                responseData.getMessages().add(errs.getDefaultMessage());
+            }
+            responseData.setStatus(false);
+            responseData.setPayload(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+        }
+
+        responseData.setStatus(true);
+        responseData.setPayload(productService.insert(product));
+        return ResponseEntity.ok(responseData);
     }
 
     @GetMapping
@@ -37,8 +57,21 @@ public class ProductController {
     }
 
     @PutMapping
-    public Product updateData(@RequestBody Product product) {
-        return productService.update(product);
+    public ResponseEntity<ResponseData<Product>> updateData(@Valid @RequestBody Product product, Errors errors) {
+        ResponseData<Product> responseData = new ResponseData<>();
+
+        if (errors.hasErrors()) {
+            for (ObjectError errs : errors.getAllErrors()) {
+                responseData.getMessages().add(errs.getDefaultMessage());
+            }
+            responseData.setStatus(false);
+            responseData.setPayload(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+        }
+
+        responseData.setStatus(true);
+        responseData.setPayload(productService.update(product));
+        return ResponseEntity.ok(responseData);
     }
 
     @DeleteMapping("/{id}")

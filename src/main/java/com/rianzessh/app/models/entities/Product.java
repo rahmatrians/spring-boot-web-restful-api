@@ -1,6 +1,7 @@
 package com.rianzessh.app.models.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -16,9 +17,11 @@ public class Product implements Serializable {
     @Column(length = 36,nullable = false)
     private String id;
 
+    @NotEmpty(message = "Name is required")
     @Column(length = 50,nullable = false)
     private String name;
 
+    @NotEmpty(message = "Description is required")
     @Column(length = 100)
     private String description;
 
